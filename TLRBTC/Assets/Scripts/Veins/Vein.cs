@@ -48,7 +48,9 @@ namespace Assets.Scripts.Veins
                     // Check if there is any delta between the veins
                     if (!delta.IsZero())
                     {
+                        float angle = CalculateAngle(connectInfo.middle, connectInfo.left, vp.left);
 
+                        GetGameObject().transform.localEulerAngles = new Vector3(0, angle, 0);
                     }
 
                 }
@@ -58,6 +60,26 @@ namespace Assets.Scripts.Veins
             }
 
             drawcalls++;
+        }
+
+        private float CalculateAngle(Vector3 pointA, Vector3 pointB, Vector3 pointC)
+        {
+            /**
+             *       c
+             *      /|
+             *   ac/ |bc 
+             *    /  |
+             *  a --- b
+             *     ab
+             */
+
+            float ac = Vector3.Distance(pointA, pointC);
+            float ab = Vector3.Distance(pointA, pointB);
+            float bc = Vector3.Distance(pointC, pointB);
+
+            float a = Mathf.Acos((Mathf.Pow(ac, 2) + Mathf.Pow(ab, 2) - Mathf.Pow(bc, 2)) / (2 * ac * ab)) * 180 / Mathf.PI;
+
+            return a;
         }
 
         public int GetId()
@@ -107,7 +129,7 @@ namespace Assets.Scripts.Veins
         private VeinExitPoint GetVeinExitInformation(VeinExitTypes type)
         {
             Transform transform = this.GetGameObject().transform;
-            string name = type == VeinExitTypes.Entry ? "exit0" : type == VeinExitTypes.StraightExit ? "exit1" : "exit2" ;
+            string name = type == VeinExitTypes.Entry ? "exit0" : type == VeinExitTypes.StraightExit ? "exit1" : "exit2";
 
             Transform exit = null;
             for (int i = 0; i < transform.childCount; i++)
@@ -125,6 +147,11 @@ namespace Assets.Scripts.Veins
         public Vein GetStraight()
         {
             return exits[0];
+        }
+
+        public Vein GetEntry()
+        {
+            return this.entry;
         }
     }
 }
